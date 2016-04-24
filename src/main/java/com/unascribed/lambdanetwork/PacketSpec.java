@@ -13,6 +13,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multiset;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -30,7 +31,7 @@ public final class PacketSpec {
 	 * against reflection, and reflection can just strip the 'final' attribute.
 	 * it's a pointless endeavour.
 	 */
-	private Consumer<Token> consumer;
+	private BiConsumer<EntityPlayer, Token> consumer;
 	private Side side = null;
 	private int minimumSize = 1; // discriminator is 1 byte
 	
@@ -68,7 +69,7 @@ public final class PacketSpec {
 		return data.get(key);
 	}
 	
-	public Consumer<Token> getConsumer() {
+	public BiConsumer<EntityPlayer, Token> getConsumer() {
 		return consumer;
 	}
 	
@@ -128,7 +129,7 @@ public final class PacketSpec {
 	 * You almost always want to use {@link #handledOnMainThreadBy(Consumer)}
 	 * instead.
 	 */
-	public LambdaNetworkBuilder handledBy(Consumer<Token> consumer) {
+	public LambdaNetworkBuilder handledBy(BiConsumer<EntityPlayer, Token> consumer) {
 		if (parent == null) illegalStateImmutableClone();
 		checkNull(side, "isn't bound to any side");
 		checkNull(consumer, "can't have a null handler");
@@ -137,27 +138,27 @@ public final class PacketSpec {
 		return parent;
 	}
 	
-	public LambdaNetworkBuilder handledOnMainThreadBy(Consumer<Token> consumer) {
-		handledBy(t -> {
+	public LambdaNetworkBuilder handledOnMainThreadBy(BiConsumer<EntityPlayer, Token> consumer) {
+		handledBy((e, t) -> {
 			if (side.isClient()) {
-				doOnMainThreadClient(t, consumer);
+				doOnMainThreadClient(e, t, consumer);
 			} else {
-				doOnMainThreadServer(t, consumer);
+				doOnMainThreadServer(e, t, consumer);
 			}
 		});
 		return parent;
 	}
 	
 	@SideOnly(Side.CLIENT)
-	private static void doOnMainThreadClient(Token t, Consumer<Token> consumer) {
+	private static void doOnMainThreadClient(EntityPlayer e, Token t, BiConsumer<EntityPlayer, Token> consumer) {
 		Minecraft.getMinecraft().addScheduledTask(() -> {
-			consumer.accept(t);
+			consumer.accept(e, t);
 		});
 	}
 	
-	private static void doOnMainThreadServer(Token t, Consumer<Token> consumer) {
+	private static void doOnMainThreadServer(EntityPlayer e, Token t, BiConsumer<EntityPlayer, Token> consumer) {
 		MinecraftServer.getServer().addScheduledTask(() -> {
-			consumer.accept(t);
+			consumer.accept(e, t);
 		});
 	}
 

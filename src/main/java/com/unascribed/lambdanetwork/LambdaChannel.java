@@ -9,6 +9,9 @@ import com.google.common.collect.Lists;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -72,17 +75,17 @@ public class LambdaChannel {
 	@SubscribeEvent
 	public void onServerCustomPacket(ServerCustomPacketEvent e) {
 		ByteBuf payload = e.packet.payload();
-		readPacket(e.side(), payload);
+		readPacket(e.side(), ((NetHandlerPlayServer)e.handler).playerEntity, payload);
 	}
 	
 	@SubscribeEvent
 	public void onClientCustomPacket(ClientCustomPacketEvent e) {
 		ByteBuf payload = e.packet.payload();
-		readPacket(e.side(), payload);
+		readPacket(e.side(), Minecraft.getMinecraft().thePlayer, payload);
 	}
 	
 	
-	private void readPacket(Side side, ByteBuf payload) {
+	private void readPacket(Side side, EntityPlayer p, ByteBuf payload) {
 		int id = payload.readUnsignedByte();
 		if (id >= ids.size()) {
 			throw new IllegalArgumentException("Unknown lambda packet id "+id);
@@ -103,7 +106,7 @@ public class LambdaChannel {
 		for (Map.Entry<String, DataType> en : spec.getData().entrySet()) {
 			token.putData(en.getKey(), en.getValue().reader.apply(payload));
 		}
-		spec.getConsumer().accept(token);
+		spec.getConsumer().accept(p, token);
 	}
 
 
