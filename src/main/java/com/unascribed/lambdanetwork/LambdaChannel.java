@@ -19,6 +19,7 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientCustomPacketE
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
 import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class LambdaChannel {
 	private final String channel;
@@ -79,6 +80,7 @@ public class LambdaChannel {
 	}
 	
 	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
 	public void onClientCustomPacket(ClientCustomPacketEvent e) {
 		ByteBuf payload = e.packet.payload();
 		readPacket(e.side(), Minecraft.getMinecraft().thePlayer, payload);
