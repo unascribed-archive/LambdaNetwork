@@ -80,7 +80,7 @@ public enum DataType {
 	ARBITRARY(byte[].class,
 			(ByteBuf buf, byte[] arr) -> {
 				ByteBufUtils.writeVarInt(buf, arr.length, 5);
-				buf.writeBytes(buf);
+				buf.writeBytes(arr);
 			},
 			(ByteBuf buf) -> {
 				byte[] arr = new byte[ByteBufUtils.readVarInt(buf, 5)];
