@@ -37,8 +37,8 @@ artifacts {
 }
 
 dependencies {
-	compile 'com.unascribed:lambdanetwork:0.0.3'
-	shadow 'com.unascribed:lambdanetwork:0.0.3'
+	compile 'com.unascribed:lambdanetwork:0.0.6'
+	shadow 'com.unascribed:lambdanetwork:0.0.6'
 }
 ```
 
@@ -56,6 +56,7 @@ network = LambdaNetwork.builder()
 			System.out.println("theFloat: "+token.getFloat("theFloat"));
 		})
 	.packet("AnotherCoolPacket")
+		.boundTo(Side.SERVER)
 		.handledBy(token -> {
 			System.out.println("got empty packet");
 		})
