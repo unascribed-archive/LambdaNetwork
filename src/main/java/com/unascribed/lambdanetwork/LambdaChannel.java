@@ -67,7 +67,9 @@ public class LambdaChannel {
 			payload.writeByte(by);
 		}
 		for (Map.Entry<String, DataType> en : spec.getData().entrySet()) {
-			en.getValue().writer.accept(payload, pp.getData().get(en.getKey()));
+			if (en.getValue().writer != null) {
+				en.getValue().writer.accept(payload, pp.getData().get(en.getKey()));
+			}
 		}
 		return new FMLProxyPacket(payload, channel);
 	}
@@ -106,7 +108,9 @@ public class LambdaChannel {
 			}
 		}
 		for (Map.Entry<String, DataType> en : spec.getData().entrySet()) {
-			token.putData(en.getKey(), en.getValue().reader.apply(payload));
+			if (en.getValue().reader != null) {
+				token.putData(en.getKey(), en.getValue().reader.apply(payload));
+			}
 		}
 		spec.getConsumer().accept(p, token);
 	}
