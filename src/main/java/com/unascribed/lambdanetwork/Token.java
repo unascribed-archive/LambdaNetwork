@@ -4,6 +4,8 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
+import net.minecraft.nbt.NBTTagCompound;
+
 public class Token {
 	private PacketSpec packet;
 	private Map<String, Object> data = Maps.newHashMap();
@@ -63,6 +65,13 @@ public class Token {
 			invalidType(key, "byte[]");
 		}
 		return ((byte[])data.get(key));
+	}
+	
+	public NBTTagCompound getNBT(String key) {
+		if (!packet.getType(key).isValidForNBT()) {
+			invalidType(key, "NBTTagCompound");
+		}
+		return ((NBTTagCompound)data.get(key));
 	}
 	
 	private void invalidType(String key, String type) {
