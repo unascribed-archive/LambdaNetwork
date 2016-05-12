@@ -58,7 +58,7 @@ public class LambdaChannel {
 		int booleanBits = spec.getAmountOfType(DataType.BOOLEAN);
 		for (int i = 0; i < Math.ceil(booleanBits/8f); i++) {
 			int by = 0;
-			for (int j = i*8; j < i+8; j++) {
+			for (int j = i*8; j < Math.min(spec.getBooleanKeys().size(), i+8); j++) {
 				String key = spec.getBooleanKeys().get(j);
 				if (((Boolean)pp.getData().get(key))) {
 					by |= (1 << j);
@@ -101,7 +101,7 @@ public class LambdaChannel {
 		int booleanBits = spec.getAmountOfType(DataType.BOOLEAN);
 		for (int i = 0; i < Math.ceil(booleanBits/8f); i++) {
 			int by = payload.readUnsignedByte();
-			for (int j = i*8; j < i+8; j++) {
+			for (int j = i*8; j < Math.min(spec.getBooleanKeys().size(), i+8); j++) {
 				token.putData(spec.getBooleanKeys().get(j), (by & (1 << (j-i))) != 0);
 			}
 		}
