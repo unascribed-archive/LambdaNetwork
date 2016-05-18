@@ -77,14 +77,14 @@ public class LambdaChannel {
 
 	@SubscribeEvent
 	public void onServerCustomPacket(ServerCustomPacketEvent e) {
-		ByteBuf payload = e.packet.payload();
-		readPacket(e.side(), ((NetHandlerPlayServer)e.handler).playerEntity, payload);
+		ByteBuf payload = e.getPacket().payload();
+		readPacket(e.side(), ((NetHandlerPlayServer)e.getHandler()).playerEntity, payload);
 	}
 	
 	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
 	public void onClientCustomPacket(ClientCustomPacketEvent e) {
-		ByteBuf payload = e.packet.payload();
+		ByteBuf payload = e.getPacket().payload();
 		readPacket(e.side(), Minecraft.getMinecraft().thePlayer, payload);
 	}
 	

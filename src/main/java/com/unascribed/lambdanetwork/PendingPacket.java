@@ -16,14 +16,14 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.network.play.INetHandlerPlayServer;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.Vec3;
-import net.minecraft.util.Vec3i;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -171,7 +171,7 @@ public class PendingPacket {
 		if (packet.getSide().isServer()) wrongSide();
 		if (player instanceof EntityPlayerMP) {
 			for (Packet<INetHandlerPlayClient> p : toClientboundVanillaPackets()) {
-				((EntityPlayerMP)player).playerNetServerHandler.sendPacket(p);
+				((EntityPlayerMP)player).connection.sendPacket(p);
 			}
 		}
 	}
@@ -201,7 +201,7 @@ public class PendingPacket {
 	 * For use on the server-side. Sends this packet to every player that is
 	 * within the given radius of the given position.
 	 */
-	public void toAllAround(World world, Vec3 pos, double radius) {
+	public void toAllAround(World world, Vec3d pos, double radius) {
 		toAllAround(world, pos.xCoord, pos.yCoord, pos.zCoord, radius);
 	}
 	
@@ -216,7 +216,7 @@ public class PendingPacket {
 		for (EntityPlayerMP ep : world.getPlayers(EntityPlayerMP.class, Predicates.alwaysTrue())) {
 			if (ep.getDistanceSq(x, y, z) <= sq) {
 				for (Packet<INetHandlerPlayClient> packet : packets) {
-					ep.playerNetServerHandler.sendPacket(packet);
+					ep.connection.sendPacket(packet);
 				}
 			}
 		}
@@ -231,12 +231,12 @@ public class PendingPacket {
 		if (world instanceof WorldServer) {
 			WorldServer srv = (WorldServer)world;
 			Chunk c = srv.getChunkFromBlockCoords(pos);
-			if (srv.getPlayerManager().hasPlayerInstance(c.xPosition, c.zPosition)) {
+			if (srv.getPlayerChunkMap().contains(c.xPosition, c.zPosition)) {
 				List<Packet<INetHandlerPlayClient>> packets = toClientboundVanillaPackets();
 				for (EntityPlayerMP ep : world.getPlayers(EntityPlayerMP.class, Predicates.alwaysTrue())) {
-					if (srv.getPlayerManager().isPlayerWatchingChunk(ep, c.xPosition, c.zPosition)) {
+					if (srv.getPlayerChunkMap().isPlayerWatchingChunk(ep, c.xPosition, c.zPosition)) {
 						for (Packet<INetHandlerPlayClient> packet : packets) {
-							ep.playerNetServerHandler.sendPacket(packet);
+							ep.connection.sendPacket(packet);
 						}
 					}
 				}
@@ -277,7 +277,7 @@ public class PendingPacket {
 		List<Packet<INetHandlerPlayClient>> packets = toClientboundVanillaPackets();
 		for (EntityPlayerMP ep : world.getPlayers(EntityPlayerMP.class, Predicates.alwaysTrue())) {
 			for (Packet<INetHandlerPlayClient> packet : packets) {
-				ep.playerNetServerHandler.sendPacket(packet);
+				ep.connection.sendPacket(packet);
 			}
 		}
 	}
@@ -291,9 +291,9 @@ public class PendingPacket {
 	public void toEveryone() {
 		if (packet.getSide().isServer()) wrongSide();
 		List<Packet<INetHandlerPlayClient>> packets = toClientboundVanillaPackets();
-		for (EntityPlayerMP ep : MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
+		for (EntityPlayerMP ep : FMLCommonHandler.instance().getMinecraftServerInstance().getPlayerList().getPlayerList()) {
 			for (Packet<INetHandlerPlayClient> packet : packets) {
-				ep.playerNetServerHandler.sendPacket(packet);
+				ep.connection.sendPacket(packet);
 			}
 		}
 	}
@@ -305,7 +305,7 @@ public class PendingPacket {
 	@SideOnly(Side.CLIENT)
 	public void toServer() {
 		if (packet.getSide().isClient()) wrongSide();
-		Minecraft.getMinecraft().getNetHandler().addToSendQueue(toServerboundVanillaPacket());
+		Minecraft.getMinecraft().getConnection().sendPacket(toServerboundVanillaPacket());
 	}
 	
 	private void wrongSide() {

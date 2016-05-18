@@ -14,7 +14,7 @@ import com.google.common.collect.Multiset;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -157,7 +157,7 @@ public final class PacketSpec {
 	}
 	
 	private static void doOnMainThreadServer(EntityPlayer e, Token t, BiConsumer<EntityPlayer, Token> consumer) {
-		MinecraftServer.getServer().addScheduledTask(() -> {
+		((WorldServer)e.worldObj).addScheduledTask(() -> {
 			consumer.accept(e, t);
 		});
 	}
