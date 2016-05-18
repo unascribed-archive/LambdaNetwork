@@ -37,8 +37,8 @@ artifacts {
 }
 
 dependencies {
-	compile 'com.unascribed:lambdanetwork:0.0.6'
-	shadow 'com.unascribed:lambdanetwork:0.0.6'
+	compile 'com.unascribed:lambdanetwork:1.0.0'
+	shadow 'com.unascribed:lambdanetwork:1.0.0'
 }
 ```
 
