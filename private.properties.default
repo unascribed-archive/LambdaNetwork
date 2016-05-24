@@ -1,0 +1,4 @@
+scpHost=
+scpPath=
+scpUser=
+scpKey=~/.ssh/id_rsa
