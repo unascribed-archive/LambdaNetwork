@@ -1,8 +1,7 @@
 package com.unascribed.lambdanetwork;
 
-import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import com.google.common.collect.Maps;
 
@@ -303,7 +302,32 @@ public class PendingPacket {
         return channel.getPacketFrom(this).toS3FPacket();
 	}
 
-    static Stream<EntityPlayerMP> playerMPsOnly(Collection i) {
-		return i.stream().filter(x -> x instanceof EntityPlayerMP);
-    }
+	static Iterable<EntityPlayerMP> playerMPsOnly(Iterable i) {
+		return () -> new Iterator<EntityPlayerMP>() {
+			private EntityPlayerMP next;
+			private final Iterator underlying = i.iterator();
+
+			private void advance() {
+				while (next == null && underlying.hasNext()) {
+					Object n = underlying.next();
+					if (n instanceof EntityPlayerMP)
+						next = (EntityPlayerMP) n;
+				}
+			}
+
+			@Override
+			public boolean hasNext() {
+				advance();
+				return next != null;
+			}
+
+			@Override
+			public EntityPlayerMP next() {
+				advance();
+				EntityPlayerMP ret = next;
+				next = null;
+				return ret;
+			}
+		};
+	}
 }
