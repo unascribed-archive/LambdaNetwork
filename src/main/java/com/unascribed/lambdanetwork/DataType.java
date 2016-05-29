@@ -2,9 +2,9 @@ package com.unascribed.lambdanetwork;
 
 import com.google.common.collect.ImmutableList;
 
+import cpw.mods.fml.common.network.ByteBufUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 public enum DataType {
 	/** variable-size protobuf integer, maximum 5 bytes */

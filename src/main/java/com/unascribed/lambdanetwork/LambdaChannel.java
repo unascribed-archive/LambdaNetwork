@@ -7,19 +7,18 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.network.FMLNetworkEvent;
+import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientCustomPacketEvent;
-import net.minecraftforge.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
-import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 public class LambdaChannel {
 	private final String channel;
@@ -76,14 +75,14 @@ public class LambdaChannel {
 
 
 	@SubscribeEvent
-	public void onServerCustomPacket(ServerCustomPacketEvent e) {
+	public void onServerCustomPacket(FMLNetworkEvent.ServerCustomPacketEvent e) {
 		ByteBuf payload = e.packet.payload();
 		readPacket(e.side(), ((NetHandlerPlayServer)e.handler).playerEntity, payload);
 	}
 	
 	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
-	public void onClientCustomPacket(ClientCustomPacketEvent e) {
+	public void onClientCustomPacket(FMLNetworkEvent.ClientCustomPacketEvent e) {
 		ByteBuf payload = e.packet.payload();
 		readPacket(e.side(), Minecraft.getMinecraft().thePlayer, payload);
 	}

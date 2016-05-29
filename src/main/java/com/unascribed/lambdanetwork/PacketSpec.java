@@ -12,16 +12,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multiset;
 
-import net.minecraft.client.Minecraft;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 public final class PacketSpec {
 	private final LambdaNetworkBuilder parent;
 	private final String identifier;
-	private final Map<String, DataType> data;
+	public final Map<String, DataType> data;
 	private final Multiset<DataType> types;
 	private final List<String> booleanKeys;
 	
@@ -124,42 +121,19 @@ public final class PacketSpec {
 		this.side = side;
 		return this;
 	}
-	
-	/**
-	 * You almost always want to use {@link #handledOnMainThreadBy(Consumer)}
-	 * instead.
-	 */
+
+	@Deprecated
 	public LambdaNetworkBuilder handledBy(BiConsumer<EntityPlayer, Token> consumer) {
+		return handledOnMainThreadBy(consumer);
+	}
+
+	public LambdaNetworkBuilder handledOnMainThreadBy(BiConsumer<EntityPlayer, Token> consumer) {
 		if (parent == null) illegalStateImmutableClone();
 		checkNull(side, "isn't bound to any side");
 		checkNull(consumer, "can't have a null handler");
 		this.consumer = consumer;
 		parent.addPacket(this);
 		return parent;
-	}
-	
-	public LambdaNetworkBuilder handledOnMainThreadBy(BiConsumer<EntityPlayer, Token> consumer) {
-		handledBy((e, t) -> {
-			if (side.isClient()) {
-				doOnMainThreadClient(e, t, consumer);
-			} else {
-				doOnMainThreadServer(e, t, consumer);
-			}
-		});
-		return parent;
-	}
-	
-	@SideOnly(Side.CLIENT)
-	private static void doOnMainThreadClient(EntityPlayer e, Token t, BiConsumer<EntityPlayer, Token> consumer) {
-		Minecraft.getMinecraft().addScheduledTask(() -> {
-			consumer.accept(e, t);
-		});
-	}
-	
-	private static void doOnMainThreadServer(EntityPlayer e, Token t, BiConsumer<EntityPlayer, Token> consumer) {
-		MinecraftServer.getServer().addScheduledTask(() -> {
-			consumer.accept(e, t);
-		});
 	}
 
 	private void illegalStateImmutableClone() {
